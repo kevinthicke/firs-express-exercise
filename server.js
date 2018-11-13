@@ -1,8 +1,10 @@
 const express = require('express'),
-      bodyParser = require('body-parser'),
-      fs = require('fs');
+      bodyParser = require('body-parser');
 
-const movies = require('./data/movies.json')
+const writeDataOfMovies = require('./utils/writeDataOfMovies.js');
+
+const moviesPath = './data/movies.json';
+const movies = require(moviesPath);
 
 const port = 3000;
 const app = express();
@@ -13,10 +15,13 @@ app.get('/movies', (require, response) => response.send(movies));
 
 app.post('/movies/', (require, response) => {
       const newMovie = require.body;
-      if (newMovie) {
+      const newMovieAlredyExists = movies.find(movie => movie.name === newMovie.name);
+      if (newMovieAlredyExists) {
+            response.send(`Error: The movie ${newMovie.name} alredy exists`);
+      } else { 
             movies.push(newMovie);
-            fs.writeFile('texto.json', JSON.stringify(movies), err => console.log('An error has ocurred'));
-      } else response.send('Error');
+            writeDataOfMovies(moviesPath, movies);
+      }
 });
 
 app.listen(port, () => console.log(`Server running an localhost:${port}`)); 
